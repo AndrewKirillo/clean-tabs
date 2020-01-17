@@ -49,7 +49,8 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "eslint-import-resolver-alias": "^1.1.2",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "react-tabs": "^3.1.0"
   },
   "resolutions": {
     "serialize-javascript": "^2.1.1"

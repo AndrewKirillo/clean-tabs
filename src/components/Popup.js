@@ -1,5 +1,6 @@
 /*global chrome*/
 import React from 'react';
+import utils from '../utils';
 
 export default class Popup extends React.Component {
 
@@ -21,13 +22,14 @@ export default class Popup extends React.Component {
 
   takeSnapshot = () => {
     chrome.tabs.query({ currentWindow: true }, (tabs) => {
-      const spaceName = this.state.spaceName || `Space from ${new Date().toDateString()}`;
-      chrome.storage.sync.get("spaces", (spaces) => {
-        const newSpaces = { ...spaces };
+      const spaceName = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
+      chrome.storage.sync.get("spaces", (spacesObj) => {
+        const newSpaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
         newSpaces[spaceName] = tabs;
         chrome.storage.sync.set({"spaces": newSpaces}, () => {
           // List update ping?
           this.setState({ newSpaceName: "" });
+          chrome.runtime.sendMessage({value: "reload"});
         });
       });
     })

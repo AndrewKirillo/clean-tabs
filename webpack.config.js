@@ -30,8 +30,8 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode === 'production' ? false : 'eval-source-maps',
   plugins: [
-    ...htmlPlugins,
     new CleanWebpackPlugin(),
+    ...htmlPlugins,
     new CopyPlugin([{
       from: path.join(__dirname, "public"),
       to: ""
@@ -62,9 +62,8 @@ module.exports = (env, argv) => ({
 				},
       },
       {
-				test: /\.css$/,
-				use: ["style-loader", {loader: "css-loader", options: {modules: true}}],
-				exclude: /node_modules/,
+				test: /\.css$/i,
+				use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(svg|jpg|gif|png)$/,
