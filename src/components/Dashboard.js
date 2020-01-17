@@ -51,7 +51,7 @@ export default class Dashboard extends React.Component {
                             
                             {this.state.spaces[space].map((tab, index) => (
                                 <TabPanel key={index}>
-                                  <h2>{tab.title}</h2>
+                                    <a href={tab.url} target="_blank" rel="noopener noreferrer">{tab.title}</a>
                                 </TabPanel>
                             ))}
                         </Tabs>
