@@ -1,14 +1,51 @@
+.space {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: max-content;
+    margin-bottom: 1rem;
+}
+
+.space-title {
+    margin: 0;
+}
+
+.space-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.space-action .big-spacer {
+    flex: 1;
+}
+
+.space-action .small-spacer {
+    flex: 0.1;
+}
+
+.space-card {
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.32);
+    border-radius: 5px;
+    width: 18rem;
+    padding: 2px;
+}
+
+.space-card .ant-tabs-bar {
+    margin: 0;
+}
+
 .tab-fav {
     height: 16px;
 }
 
-.space-card {
-    background-color: #ededed;
-    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.32);
-    border-radius: 5px;
-}
-
-.space-card .react-tabs__tab {
-    border: none;
-    bottom: 0;
+.tab {
+    height: 9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    text-align: center;
 }

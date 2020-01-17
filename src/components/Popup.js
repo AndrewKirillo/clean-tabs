@@ -1,5 +1,6 @@
 /*global chrome*/
 import React from 'react';
+import shortid from 'shortid';
 import utils from '../utils';
 
 export default class Popup extends React.Component {
@@ -22,12 +23,24 @@ export default class Popup extends React.Component {
 
   takeSnapshot = () => {
     chrome.tabs.query({ currentWindow: true }, (tabs) => {
-      const spaceName = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
+
+      // const tabUrls = tabs.map(tab => tab.url);
+      // chrome.windows.create({ url: tabUrls }, (window) => {
+      //   window.tabs.forEach(tab => {
+      //     chrome.tabs.update(tab.id, { active: true }, (tab) => {
+      //       chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }, (tabScreenshot) => {
+      //         console.log(tabScreenshot);
+      //       })
+      //     })
+      //   })
+      // })
+
+      const name = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
       chrome.storage.sync.get("spaces", (spacesObj) => {
-        const newSpaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
-        newSpaces[spaceName] = tabs;
-        chrome.storage.sync.set({"spaces": newSpaces}, () => {
-          // List update ping?
+        const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
+        const id = shortid.generate();
+        spaces[id] = { id, name, tabs };
+        chrome.storage.sync.set({ spaces }, () => {
           this.setState({ newSpaceName: "" });
           chrome.runtime.sendMessage({value: "reload"});
         });
