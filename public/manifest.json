@@ -1,0 +1,10 @@
+{
+    "name": "Tab Spaces",
+    "version": "1.0",
+    "manifest_version": 2,
+    "browser_action": {
+      "default_title": "Tab Spaces",
+      "default_popup": "popup.html"
+    },
+    "permissions": ["storage", "tabs"]
+  }
