@@ -22,7 +22,7 @@ export default class Popup extends React.Component {
   }
 
   takeSnapshot = () => {
-    chrome.tabs.query({ currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ currentWindow: true }, (tabsArr) => {
 
       // const tabUrls = tabs.map(tab => tab.url);
       // chrome.windows.create({ url: tabUrls }, (window) => {
@@ -34,6 +34,7 @@ export default class Popup extends React.Component {
       //     })
       //   })
       // })
+      const tabs = utils.getTabsObj(tabsArr);
 
       const name = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
       chrome.storage.sync.get("spaces", (spacesObj) => {
