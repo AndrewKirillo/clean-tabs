@@ -1,25 +1,44 @@
+@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:400,600,700,800,900&display=swap");
+
+body {
+    background-color: #FfFDF8;
+    font-family: 'Nunito Sans';
+}
+
 .space {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     width: max-content;
-    margin-bottom: 1rem;
+    margin-bottom: 3rem;
 }
 
 .space-title {
     margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.7);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.space-title:hover {
+    color: #000000;
 }
 
 .space-action {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    width: 18rem;
     margin-bottom: 8px;
 }
 
 .space-action .big-spacer {
     flex: 1;
+    min-width: 8px;
 }
 
 .space-action .small-spacer {
@@ -27,7 +46,7 @@
 }
 
 .space-card {
-    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.32);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.32);
     border-radius: 5px;
     width: 18rem;
     background-color: #efefef;
@@ -44,23 +63,69 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 8px;
+    padding: 20px;
     text-align: center;
     background-color: white;
 }
 
-.tab .ant-tabs-tab {
+.space-card .ant-tabs-tab {
     padding: 12px 16px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .tab-fav {
-    height: 16px;
+    height: 20px;
 }
 
 .tab-title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    font-weight: bold;
-    font-size: 1.2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.dashboard-carousel {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.ant-carousel .dashboard-carousel .slick-list {
+    padding: 16px;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 900;
+    padding: 4rem 0 2.5rem 4rem;
+    margin: 0;
+}
+
+.ant-carousel .slick-list .slick-slide.slick-active {
+    pointer-events: initial;
+}
+
+.ant-carousel .slick-list .slick-slide {
+    pointer-events: initial;
+}
+
+.dashboard-carousel-button {
+    position: fixed;
+    top: 19.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-carousel-button span {
+    height: 16px;
+}
+
+.dashboard-carousel-prev {
+    left: 2rem;
+}
+
+.dashboard-carousel-next {
+    right: 2rem;
 }

@@ -1,6 +1,7 @@
 /*global chrome*/
 import React from 'react';
 import { Tabs, Button, Dropdown, Menu, Carousel } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import "antd/dist/antd.css";
 import ModalForm from "./ModalForm";
 import "./Dashboard.css";
@@ -22,15 +23,24 @@ export default class Dashboard extends React.Component {
             editModalId: "",
             editModalName: "",
             editModalTabs: [],
-            tabToSpace: {}
+            tabToSpace: {},
+            screenWidth: 0
         }
-        
+
+        this.carousel = React.createRef();
+        this.updateScreenWidth = this.updateScreenWidth.bind(this);
+
         this.getSpaces = this.getSpaces.bind(this);
         this.openSpace = this.openSpace.bind(this);
         this.optionsMenu = this.optionsMenu.bind(this);
+        this.carouselPrev = this.carouselPrev.bind(this);
+        this.carouselNext = this.carouselNext.bind(this);
     }
     
     componentDidMount = () => {
+        this.updateScreenWidth();
+        window.addEventListener('resize', this.updateScreenWidth);
+        
         this.getSpaces();
         
         chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
@@ -40,25 +50,33 @@ export default class Dashboard extends React.Component {
         })
 
         chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
-            if (info.status == "complete" && this.state.tabToSpace.hasOwnProperty(tabId)) {
-                const spaceId = this.state.tabToSpace[tabId];
-                const spaces = { ...this.state.spaces };
-                const tabs = { ...this.state.spaces[spaceId].tabs }
-                tabs[tabId] = tab;
-                const space = { ...spaces[spaceId], tabs };
-                spaces[spaceId] = space;
-
-                chrome.tabs.remove(tabId);
-
-                chrome.storage.sync.set({ "spaces": spaces });
-
-                this.setState({ spaces });
-            }
+            chrome.windows.getCurrent(currWindow => {
+              if(currWindow.id !== tab.windowId) {
+                if (info.status == "complete" && this.state.tabToSpace.hasOwnProperty(tabId)) {
+                    const spaceId = this.state.tabToSpace[tabId];
+                    const spaces = { ...this.state.spaces };
+                    const tabs = { ...this.state.spaces[spaceId].tabs }
+                    tabs[tabId] = tab;
+                    const space = { ...spaces[spaceId], tabs };
+                    spaces[spaceId] = space;
+    
+                    chrome.tabs.remove(tabId);
+    
+                    chrome.storage.local.set({ "spaces": spaces });
+    
+                    this.setState({ spaces });
+                }
+              }
+            })
         })
+    }
+
+    updateScreenWidth = () => {
+        this.setState({ screenWidth: window.innerWidth });
     }
     
     getSpaces = () => {
-        chrome.storage.sync.get("spaces", (spacesObj) => {
+        chrome.storage.local.get("spaces", (spacesObj) => {
             const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
             const tabToSpace = {};
             Object.keys(spaces).forEach(spaceId => {
@@ -112,7 +130,7 @@ export default class Dashboard extends React.Component {
             tabToSpace[tabId] = this.state.editModalId;
         })
         
-        chrome.storage.sync.set({"spaces": spaces});
+        chrome.storage.local.set({"spaces": spaces});
 
         this.setState({ spaces, tabToSpace, editModalOpen: false, editModalId: "", editModalName: "", editModalTabs: {} })
     }
@@ -125,7 +143,7 @@ export default class Dashboard extends React.Component {
         const spaces = this.state.spaces;
         delete spaces[spaceId];
         
-        chrome.storage.sync.set({ spaces }, () => {
+        chrome.storage.local.set({ spaces }, () => {
             this.setState({ spaces });
         });
     }
@@ -140,9 +158,17 @@ export default class Dashboard extends React.Component {
             </Menu.Item>
         </Menu>
     )
+
+    carouselPrev = () => {
+        this.carousel.prev();
+    }
+
+    carouselNext = () => {
+        this.carousel.next();
+    }
     
     render = () => {
-        console.log(this.state.spaces);
+        console.log(Object.keys(this.state.spaces).length);
         const modalProps = {
             visible: this.state.editModalOpen,
             onOk: null,
@@ -155,14 +181,11 @@ export default class Dashboard extends React.Component {
 
 
         const spacesArr = Object.keys(this.state.spaces).map(spaceId => this.state.spaces[spaceId]);
-        const numFullSlides = Math.floor(Object.keys(this.state.spaces).length / 8);
         const slides = [];
-        for (let i = 0; i < numFullSlides; i++) {
-            const slideSpaces = [];
-            for (let j = i*8; j < i*9; j++) {
-                const space = spacesArr[j];
-                slideSpaces.push(
-                    <div className="space" key={j}>
+        spacesArr.forEach((space, spaceIndex) => {
+            slides.push(
+                <div className="dashboard-slide full-slide">
+                    <div className="space" key={spaceIndex}>
                         <div className="space-action">
                             <h3 className="space-title" onClick={this.openSpace(space.id)}>{space.name}</h3>
                             <span className="big-spacer"/>
@@ -181,53 +204,36 @@ export default class Dashboard extends React.Component {
                             })}
                         </Tabs>
                     </div>
-                )
-            }
-            
-            slides.push(
-                <div className="dashboard-slide full-slide">
-                    {slideSpaces}
                 </div>
             )
-        }
-        const tailSpaces = [];
-        for (let t = numFullSlides*8; t < Object.keys(this.state.spaces).length; t++) {
-            const space = spacesArr[t];
-            tailSpaces.push(
-                <div className="space" key={t}>
-                    <div className="space-action">
-                        <h3 className="space-title" onClick={this.openSpace(space.id)}>{space.name}</h3>
-                        <span className="big-spacer"/>
-                        <Dropdown overlay={this.optionsMenu(space.id)} trigger={["click"]}>
-                            <Button className="space-button" shape="circle" icon="more"/>
-                        </Dropdown>
-                    </div>
-                    <Tabs type="card" className="space-card">
-                        {Object.keys(space.tabs).map((tabId, index) => {
-                            const tabObj = space.tabs[tabId];
-                            return (
-                                <TabPane className="tab" key={index} tab={<img src={utils.isValidUrl(tabObj.favIconUrl) ? tabObj.favIconUrl : default_fav} className="tab-fav" alt={index}/>}>
-                                    <a className="tab-title" href={tabObj.url || tabObj.pendingUrl} target="_blank" rel="noopener noreferrer">{tabObj.title || (tabObj.url || tabObj.pendingUrl)}</a>
-                                </TabPane>
-                            )
-                        })}
-                    </Tabs>
-                </div>
-            )
-        }
-        slides.push(
-            <div className="dashboard-slide tail-slide">
-                {tailSpaces}
-            </div>
-        )
+        })
         
 
+        const numSlides = Object.keys(this.state.spaces).length/(this.state.screenWidth < 1300 ? 4 : 6);
+        const carouselProps = {
+            dots: false,
+            rows: 2,
+            slidesPerRow: this.state.screenWidth < 1300 ? 2 : 3
+        };
         return (
-            <div className="dashboard">
-                <Carousel afterChange={(a, b, c) => {console.log(a, b, c)}}>
-                    {slides}
-                </Carousel>
-                <ModalForm {...modalProps}/>
+            <div className="dashboard-page">
+                <h1 className="dashboard-title">Dashboard</h1>
+                <div className="dashboard">
+                    {numSlides <= 1 ? null : 
+                    <Button className="dashboard-carousel-button dashboard-carousel-prev" size="large" shape="circle" onClick={this.carouselPrev}>
+                        <LeftOutlined />
+                    </Button>
+                    }
+                    <Carousel {...carouselProps} ref={node => (this.carousel = node)} className="dashboard-carousel">
+                        {slides}
+                    </Carousel>
+                    {numSlides <= 1 ? null : 
+                    <Button className="dashboard-carousel-button dashboard-carousel-next" size="large" shape="circle" onClick={this.carouselNext}>
+                        <RightOutlined/>
+                    </Button>
+                    }
+                    <ModalForm {...modalProps}/>
+                </div>
             </div>
         )
     }

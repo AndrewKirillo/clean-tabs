@@ -6,5 +6,5 @@
       "default_title": "Tab Spaces",
       "default_popup": "popup.html"
     },
-    "permissions": ["storage", "tabs"]
+    "permissions": ["storage", "unlimitedStorage", "tabs"]
   }

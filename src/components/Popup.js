@@ -2,6 +2,7 @@
 import React from 'react';
 import shortid from 'shortid';
 import utils from '../utils';
+import "./Popup.css";
 
 export default class Popup extends React.Component {
 
@@ -37,11 +38,11 @@ export default class Popup extends React.Component {
       const tabs = utils.getTabsObj(tabsArr);
 
       const name = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
-      chrome.storage.sync.get("spaces", (spacesObj) => {
+      chrome.storage.local.get("spaces", (spacesObj) => {
         const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
         const id = shortid.generate();
         spaces[id] = { id, name, tabs };
-        chrome.storage.sync.set({ spaces }, () => {
+        chrome.storage.local.set({ spaces }, () => {
           this.setState({ newSpaceName: "" });
           chrome.runtime.sendMessage({value: "reload"});
         });
@@ -55,7 +56,7 @@ export default class Popup extends React.Component {
 
   render = () => {
     return (
-      <div className="App">
+      <div className="popup">
         <h3>New Space Name:</h3>
         <input type="text" value={this.state.newSpaceName} onChange={this.changeName}/>
         <button onClick={this.takeSnapshot}>Take Snapshot</button>
