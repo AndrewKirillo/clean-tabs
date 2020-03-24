@@ -1,5 +1,8 @@
 /*global chrome*/
 import React from 'react';
+import { Button, Input } from 'antd';
+import "antd/dist/antd.css";
+import { CameraOutlined, DashboardOutlined } from '@ant-design/icons'
 import shortid from 'shortid';
 import utils from '../utils';
 import "./Popup.css";
@@ -37,7 +40,7 @@ export default class Popup extends React.Component {
       // })
       const tabs = utils.getTabsObj(tabsArr);
 
-      const name = this.state.newSpaceName || `Space from ${new Date().toDateString()}`;
+      const name = this.state.newSpaceName || `Snapshot ${new Date().toDateString()}`;
       chrome.storage.local.get("spaces", (spacesObj) => {
         const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
         const id = shortid.generate();
@@ -57,10 +60,10 @@ export default class Popup extends React.Component {
   render = () => {
     return (
       <div className="popup">
-        <h3>New Space Name:</h3>
-        <input type="text" value={this.state.newSpaceName} onChange={this.changeName}/>
-        <button onClick={this.takeSnapshot}>Take Snapshot</button>
-        <button onClick={this.openDash}>View Spaces</button>
+        <h3>Snapshot Name:</h3>
+        <Input value={this.state.newSpaceName} onChange={this.changeName}/>
+        <Button disabled={this.state.newSpaceName.length > 0 ? false : true } className="popup-button" type="primary" size="large" onClick={this.takeSnapshot}><CameraOutlined/>Take Snapshot</Button>
+        <Button className="popup-button" size="large" onClick={this.openDash}><DashboardOutlined/>View Dashboard</Button>
       </div>
     );
   }

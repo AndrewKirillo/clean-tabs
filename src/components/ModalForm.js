@@ -65,16 +65,16 @@ export default Form.create({ name: "edit_space_form" })(class ModalForm extends 
         const tabs = getFieldValue('tabs');
         return (
             <Modal
-            title="Edit Tab Space"
+            title="Edit Snapshot"
             visible={this.props.visible}
             onOk={this.onSubmit}
             onCancel={this.onCancel}
             >
                 <Form onSubmit={this.onSubmit}>
-                    <Form.Item label="Space Name">
+                    <Form.Item label="Snapshot Name">
                         {getFieldDecorator('name', {
                             initialValue: this.props.name,
-                            rules: [{ required: true, message: "You must name your tab session"}]
+                            rules: [{ required: true, message: "You must name your snapshot"}]
                         })(<Input/>)}
                     </Form.Item>
                     {Object.keys(tabs).map((tabId, index) => {
