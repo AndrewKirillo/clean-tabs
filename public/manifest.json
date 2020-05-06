@@ -1,10 +1,10 @@
 {
-    "name": "Clean Tabs",
-    "version": "1.0",
+    "name": "SnapTab",
+    "version": "1",
     "manifest_version": 2,
     "browser_action": {
-      "default_icon": "Clean_Tabs_logo.png",
-      "default_title": "Clean Tabs",
+      "default_icon": "SnapTab_logo.png",
+      "default_title": "SnapTab",
       "default_popup": "popup.html"
     },
     "permissions": ["storage", "unlimitedStorage", "tabs"]

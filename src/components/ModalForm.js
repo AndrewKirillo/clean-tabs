@@ -5,7 +5,7 @@ import shortid from 'shortid';
 import "antd/dist/antd.css";
 import utils from '../utils';
 
-export default Form.create({ name: "edit_space_form" })(class ModalForm extends React.Component {
+export default Form.create({ name: "edit_snapshot_form" })(class ModalForm extends React.Component {
 
     removeTab = id => {
         const { form } = this.props;
@@ -33,23 +33,56 @@ export default Form.create({ name: "edit_space_form" })(class ModalForm extends 
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const { tabUrls, name } = values;
+                const prevTabs = this.props.tabs;
                 
-                const url = Object.keys(tabUrls).map(tabId => tabUrls[tabId]);
+                const prevUrls = Object.keys(prevTabs).map(tabId => prevTabs[tabId].url);
+                console.log("prevUrls: ", prevUrls);
+                
+                const finalUrls = Object.keys(tabUrls).map(tabId => tabUrls[tabId]);
+                console.log("finalUrls:", finalUrls);
+                
+                const newUrls = finalUrls.filter(finalUrl => !prevUrls.includes(finalUrl))
+                console.log("newUrls: ", newUrls);
 
-                chrome.windows.create({ url, focused: false, state: "minimized",  }, (window) => {
-                    
-                    const tabsObj = utils.getTabsObj(window.tabs);
+                if (newUrls.length > 0) {
+                    chrome.windows.create({ url: newUrls, focused: false, state: "minimized" }, (window) => {
+                        
+                        const tabs = utils.getTabsObj(window.tabs);
+                        const keptTabIds = Object.keys(prevTabs).filter(tabId => finalUrls.includes(prevTabs[tabId].url));
+                        
+                        keptTabIds.forEach(tabId => {
+                            tabs[tabId] = prevTabs[tabId];
+                        });
+                        
+    
+    
+                        const snapshot = {
+                            id: this.props.snapshotId,
+                            name,
+                            tabs
+                        }
+                        
+                        this.props.onSubmit(snapshot);
+    
+                        this.props.form.resetFields();
+                    });
+                } else {
+                    const tabs = {}
+                    const finalTabIds = Object.keys(tabUrls);
+                    finalTabIds.forEach(tabId => {
+                        tabs[tabId] = prevTabs[tabId];
+                    });
 
-                    const space = {
-                        id: this.props.spaceId,
+                    const snapshot = {
+                        id: this.props.snapshotId,
                         name,
-                        tabs: tabsObj
+                        tabs
                     }
                     
-                    this.props.onSubmit(space);
+                    this.props.onSubmit(snapshot);
 
                     this.props.form.resetFields();
-                });
+                }
             }
         });
     }

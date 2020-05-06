@@ -70,7 +70,13 @@ getTabsObj = (tabsArr) => {
   const tabs = {};
   tabsArr.forEach(tab => {
     const { id } = tab;
-    tabs[id] = { ...tab, id };
+    tabs[id] = {
+      id,
+      favIconUrl: tab.favIconUrl,
+      title: tab.title,
+      url: tab.url,
+      pendingUrl: tab.pendingUrl
+    };
   });
 
   return tabs;

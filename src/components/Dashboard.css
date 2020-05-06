@@ -1,11 +1,11 @@
-@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:400,600,700,800,900&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:600,700,900&display=swap");
 
 body {
-    background-color: #FfFDF8;
+    background-color: #111621;
     font-family: 'Nunito Sans';
 }
 
-.space {
+.snapshot {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -13,22 +13,17 @@ body {
     margin-bottom: 3rem;
 }
 
-.space-title {
+.snapshot-title {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
     cursor: pointer;
-    color: rgba(0, 0, 0, 0.7);
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
 }
 
-.space-title:hover {
-    color: #000000;
-}
-
-.space-action {
+.snapshot-action {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,23 +31,23 @@ body {
     margin-bottom: 8px;
 }
 
-.space-action .big-spacer {
+.snapshot-action .big-spacer {
     flex: 1;
     min-width: 8px;
 }
 
-.space-action .small-spacer {
+.snapshot-action .small-spacer {
     flex: 0.1;
 }
 
-.space-card {
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.32);
+.snapshot-card {
+    box-shadow: 0px 0px 12px #1890ff;
     border-radius: 5px;
     width: 18rem;
     background-color: #efefef;
 }
 
-.space-card .ant-tabs-bar {
+.snapshot-card .ant-tabs-bar {
     margin: 0;
     padding: 2px;
     padding-bottom: 0;
@@ -66,9 +61,10 @@ body {
     padding: 20px;
     text-align: center;
     background-color: white;
+    position: relative;
 }
 
-.space-card .ant-tabs-tab {
+.snapshot-card .ant-tabs-tab {
     padding: 12px 16px;
     display: inline-flex;
     align-items: center;
@@ -86,6 +82,13 @@ body {
     font-size: 1.1rem;
 }
 
+.tab-link-button {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 1.2rem;
+}
+
 .dashboard-carousel {
     width: 80%;
     margin: 0 auto;
@@ -98,8 +101,8 @@ body {
 .dashboard-title {
     font-size: 2rem;
     font-weight: 900;
-    padding: 4rem 0 2.5rem 4rem;
     margin: 0;
+    color: #e6f3ff;
 }
 
 .ant-carousel .slick-list .slick-slide.slick-active {
@@ -108,6 +111,17 @@ body {
 
 .ant-carousel .slick-list .slick-slide {
     pointer-events: initial;
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4rem 0 2.5rem 4rem;
+}
+
+.dashboard-add-button {
+    margin-right: 4rem;
 }
 
 .dashboard-carousel-button {
@@ -128,4 +142,9 @@ body {
 
 .dashboard-carousel-next {
     right: 2rem;
+}
+
+.dashboard-carousel-empty-message {
+    color: #e6f3ff;
+    font-size: 1rem;
 }

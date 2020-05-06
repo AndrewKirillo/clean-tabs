@@ -1,7 +1,7 @@
 /*global chrome*/
 import React from 'react';
-import { Tabs, Button, Dropdown, Menu, Carousel } from 'antd';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { Tabs, Button, Dropdown, Menu, Carousel, Empty } from 'antd';
+import { LeftOutlined, RightOutlined, PlusOutlined, ExportOutlined } from '@ant-design/icons';
 import "antd/dist/antd.css";
 import ModalForm from "./ModalForm";
 import "./Dashboard.css";
@@ -18,20 +18,20 @@ export default class Dashboard extends React.Component {
         super(props);
         
         this.state = {
-            spaces: {},
+            snapshots: {},
             editModalOpen: false,
             editModalId: "",
             editModalName: "",
             editModalTabs: [],
-            tabToSpace: {},
+            tabToSnapshot: {},
             screenWidth: 0
         }
 
         this.carousel = React.createRef();
         this.updateScreenWidth = this.updateScreenWidth.bind(this);
 
-        this.getSpaces = this.getSpaces.bind(this);
-        this.openSpace = this.openSpace.bind(this);
+        this.getSnapshots = this.getSnapshots.bind(this);
+        this.openSnapshot = this.openSnapshot.bind(this);
         this.optionsMenu = this.optionsMenu.bind(this);
         this.carouselPrev = this.carouselPrev.bind(this);
         this.carouselNext = this.carouselNext.bind(this);
@@ -41,30 +41,30 @@ export default class Dashboard extends React.Component {
         this.updateScreenWidth();
         window.addEventListener('resize', this.updateScreenWidth);
         
-        this.getSpaces();
+        this.getSnapshots();
         
         chrome.runtime.onMessage.addListener((request, _sender, _sendResponse) => {
             if (request.value === "reload") {
-                this.getSpaces();
+                this.getSnapshots();
             }
         })
 
         chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
             chrome.windows.getCurrent(currWindow => {
               if(currWindow.id !== tab.windowId) {
-                if (info.status == "complete" && this.state.tabToSpace.hasOwnProperty(tabId)) {
-                    const spaceId = this.state.tabToSpace[tabId];
-                    const spaces = { ...this.state.spaces };
-                    const tabs = { ...this.state.spaces[spaceId].tabs }
-                    tabs[tabId] = tab;
-                    const space = { ...spaces[spaceId], tabs };
-                    spaces[spaceId] = space;
+                if (info.status == "complete" && this.state.tabToSnapshot.hasOwnProperty(tabId)) {
+                    const snapshotId = this.state.tabToSnapshot[tabId];
+                    const snapshots = { ...this.state.snapshots };
+                    const tabs = { ...this.state.snapshots[snapshotId].tabs }
+                    tabs[tabId] = utils.getTabsObj([tab])[tabId];
+                    const snapshot = { ...snapshots[snapshotId], tabs };
+                    snapshots[snapshotId] = snapshot;
     
                     chrome.tabs.remove(tabId);
     
-                    chrome.storage.local.set({ "spaces": spaces });
+                    chrome.storage.local.set({ "snapshots": snapshots });
     
-                    this.setState({ spaces });
+                    this.setState({ snapshots });
                 }
               }
             })
@@ -75,85 +75,75 @@ export default class Dashboard extends React.Component {
         this.setState({ screenWidth: window.innerWidth });
     }
     
-    getSpaces = () => {
-        chrome.storage.local.get("spaces", (spacesObj) => {
-            const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
-            const tabToSpace = {};
-            Object.keys(spaces).forEach(spaceId => {
-                Object.keys(spaces[spaceId].tabs).forEach(tabId => {
-                    tabToSpace[tabId] = spaceId;
+    getSnapshots = () => {
+        chrome.storage.local.get("snapshots", (snapshotsObj) => {
+            const snapshots = utils.isEmpty(snapshotsObj) ? {} : snapshotsObj.snapshots;
+            const tabToSnapshot = {};
+            Object.keys(snapshots).forEach(snapshotId => {
+                Object.keys(snapshots[snapshotId].tabs).forEach(tabId => {
+                    tabToSnapshot[tabId] = snapshotId;
                 })
             })
-            this.setState({ spaces, tabToSpace });
+            this.setState({ snapshots, tabToSnapshot });
         });
     }
     
-    openSpace = (spaceId) => () => {
-        const { tabs } = this.state.spaces[spaceId];
+    openSnapshot = (snapshotId) => () => {
+        const { tabs } = this.state.snapshots[snapshotId];
         const tabUrls = Object.keys(tabs).map(tabId => ( tabs[tabId].url || tabs[tabId].pendingUrl ));
         chrome.windows.create({
             url: tabUrls
         })
     }
 
-    addSpace = () => {
-        // const id = shortid.generate();
-        // const space = {
-        //     id,
-        //     name: "",
-        //     tabs: {}
-        // }
-
-        // const spaces = { ...this.state.spaces };
-        // spaces[id] = space;
-
+    addSnapshot = () => {
         this.setState({ editModalId: shortid.generate(), editModalOpen: true, editModalName: "", editModalTabs: { "dummy": { id: "dummy", url: "" } } });
     }
     
-    editSpace = (spaceId) => () => {
-        const space = this.state.spaces[spaceId];
+    editSnapshot = (snapshotId) => () => {
+        const snapshot = this.state.snapshots[snapshotId];
         this.setState({
-            editModalId: spaceId,
+            editModalId: snapshotId,
             editModalOpen: true,
-            editModalName: space.name,
-            editModalTabs: space.tabs
+            editModalName: snapshot.name,
+            editModalTabs: snapshot.tabs
         })
     }
 
-    handleSpaceEditSubmit = (space) => {
-        console.log(space.tabs);
-        const spaces = { ...this.state.spaces };
-        spaces[this.state.editModalId] = space;
+    handleSnapshotEditSubmit = (snapshot) => {
+        console.log(snapshot.tabs);
+        const snapshots = { ...this.state.snapshots };
+        snapshots[this.state.editModalId] = snapshot;
 
-        const tabToSpace = { ...this.state.tabToSpace };
-        Object.keys(space.tabs).forEach(tabId => {
-            tabToSpace[tabId] = this.state.editModalId;
+        const tabToSnapshot = { ...this.state.tabToSnapshot };
+        Object.keys(snapshot.tabs).forEach(tabId => {
+            tabToSnapshot[tabId] = this.state.editModalId;
         })
         
-        chrome.storage.local.set({"spaces": spaces});
+        chrome.storage.local.set({"snapshots": snapshots});
 
-        this.setState({ spaces, tabToSpace, editModalOpen: false, editModalId: "", editModalName: "", editModalTabs: {} })
+        this.setState({ snapshots, tabToSnapshot, editModalOpen: false, editModalId: "", editModalName: "", editModalTabs: {} })
     }
     
-    handleSpaceEditCancel = () => {
+    handleSnapshotEditCancel = () => {
         this.setState({ editModalOpen: false, editModalId: "", editModalName: "", editModalTabs: {} })
     }
 
-    deleteSpace = (spaceId) => () => {
-        const spaces = this.state.spaces;
-        delete spaces[spaceId];
+    deleteSnapshot = (snapshotId) => () => {
+        const snapshots = this.state.snapshots;
+        delete snapshots[snapshotId];
         
-        chrome.storage.local.set({ spaces }, () => {
-            this.setState({ spaces });
+        chrome.storage.local.set({ snapshots }, () => {
+            this.setState({ snapshots });
         });
     }
     
-    optionsMenu = (spaceId) => (
+    optionsMenu = (snapshotId) => (
         <Menu>
-            <Menu.Item key="1" onClick={this.editSpace(spaceId)}>
+            <Menu.Item key="1" onClick={this.editSnapshot(snapshotId)}>
                 Edit
             </Menu.Item>
-            <Menu.Item key="2" onClick={this.deleteSpace(spaceId)}>
+            <Menu.Item key="2" onClick={this.deleteSnapshot(snapshotId)}>
                 Delete
             </Menu.Item>
         </Menu>
@@ -168,37 +158,37 @@ export default class Dashboard extends React.Component {
     }
     
     render = () => {
-        console.log(Object.keys(this.state.spaces).length);
         const modalProps = {
             visible: this.state.editModalOpen,
             onOk: null,
-            onCancel: this.handleSpaceEditCancel,
-            onSubmit: this.handleSpaceEditSubmit,
+            onCancel: this.handleSnapshotEditCancel,
+            onSubmit: this.handleSnapshotEditSubmit,
             name: this.state.editModalName,
             tabs: this.state.editModalTabs,
-            spaceId: this.state.editModalId
+            snapshotId: this.state.editModalId
         }
 
 
-        const spacesArr = Object.keys(this.state.spaces).map(spaceId => this.state.spaces[spaceId]);
+        const snapshotsArr = Object.keys(this.state.snapshots).map(snapshotId => this.state.snapshots[snapshotId]);
         const slides = [];
-        spacesArr.forEach((space, spaceIndex) => {
+        snapshotsArr.forEach((snapshot, snapshotIndex) => {
             slides.push(
                 <div className="dashboard-slide full-slide">
-                    <div className="space" key={spaceIndex}>
-                        <div className="space-action">
-                            <h3 className="space-title" onClick={this.openSpace(space.id)}>{space.name}</h3>
+                    <div className="snapshot" key={snapshotIndex}>
+                        <div className="snapshot-action">
+                            <a className="snapshot-title" onClick={this.openSnapshot(snapshot.id)}>{snapshot.name}</a>
                             <span className="big-spacer"/>
-                            <Dropdown overlay={this.optionsMenu(space.id)} trigger={["click"]}>
-                                <Button className="space-button" shape="circle" icon="more"/>
+                            <Dropdown overlay={this.optionsMenu(snapshot.id)} trigger={["click"]}>
+                                <Button className="snapshot-button" shape="circle" icon="more"/>
                             </Dropdown>
                         </div>
-                        <Tabs type="card" className="space-card">
-                            {Object.keys(space.tabs).map((tabId, index) => {
-                                const tabObj = space.tabs[tabId];
+                        <Tabs type="card" className="snapshot-card">
+                            {Object.keys(snapshot.tabs).map((tabId, index) => {
+                                const tabObj = snapshot.tabs[tabId];
                                 return (
                                     <TabPane className="tab" key={index} tab={<img src={utils.isValidUrl(tabObj.favIconUrl) ? tabObj.favIconUrl : default_fav} className="tab-fav" alt={index}/>}>
-                                        <a className="tab-title" href={tabObj.url || tabObj.pendingUrl} target="_blank" rel="noopener noreferrer">{tabObj.title || (tabObj.url || tabObj.pendingUrl)}</a>
+                                        <a href={tabObj.url || tabObj.pendingUrl} target="_blank" rel="noopener noreferrer" className="tab-link-button"><ExportOutlined /></a>
+                                        <h4 className="tab-title">{tabObj.title || (tabObj.url || tabObj.pendingUrl)}</h4>
                                     </TabPane>
                                 )
                             })}
@@ -209,7 +199,7 @@ export default class Dashboard extends React.Component {
         })
         
 
-        const numSlides = Object.keys(this.state.spaces).length/(this.state.screenWidth < 1300 ? 4 : 6);
+        const numSlides = Object.keys(this.state.snapshots).length/(this.state.screenWidth < 1300 ? 4 : 6);
         const carouselProps = {
             dots: false,
             rows: 2,
@@ -217,16 +207,24 @@ export default class Dashboard extends React.Component {
         };
         return (
             <div className="dashboard-page">
-                <h1 className="dashboard-title">Dashboard</h1>
+                <div className="dashboard-header">
+                    <h1 className="dashboard-title">Dashboard</h1>
+                    <Button className="dashboard-add-button" type="primary" size="large" shape="round" onClick={this.addSnapshot} >
+                        <PlusOutlined />
+                        Add Snapshot
+                    </Button>
+                </div>
                 <div className="dashboard">
                     {numSlides <= 1 ? null : 
                     <Button className="dashboard-carousel-button dashboard-carousel-prev" size="large" shape="circle" onClick={this.carouselPrev}>
                         <LeftOutlined />
                     </Button>
                     }
+                    {numSlides == 0 ? <Empty imageStyle={{marginTop: "4rem"}} description={<p className="dashboard-carousel-empty-message">No Snapshots</p>}/> : 
                     <Carousel {...carouselProps} ref={node => (this.carousel = node)} className="dashboard-carousel">
                         {slides}
                     </Carousel>
+                    }
                     {numSlides <= 1 ? null : 
                     <Button className="dashboard-carousel-button dashboard-carousel-next" size="large" shape="circle" onClick={this.carouselNext}>
                         <RightOutlined/>

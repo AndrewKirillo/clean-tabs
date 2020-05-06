@@ -13,7 +13,7 @@ export default class Popup extends React.Component {
     super(props);
 
     this.state = {
-      newSpaceName: ""
+      newSnapshotName: ""
     }
 
     this.changeName = this.changeName.bind(this);
@@ -22,31 +22,21 @@ export default class Popup extends React.Component {
   }
 
   changeName = (e) => {
-    this.setState({ newSpaceName: e.target.value })
+    this.setState({ newSnapshotName: e.target.value })
   }
 
   takeSnapshot = () => {
     chrome.tabs.query({ currentWindow: true }, (tabsArr) => {
 
-      // const tabUrls = tabs.map(tab => tab.url);
-      // chrome.windows.create({ url: tabUrls }, (window) => {
-      //   window.tabs.forEach(tab => {
-      //     chrome.tabs.update(tab.id, { active: true }, (tab) => {
-      //       chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" }, (tabScreenshot) => {
-      //         console.log(tabScreenshot);
-      //       })
-      //     })
-      //   })
-      // })
       const tabs = utils.getTabsObj(tabsArr);
 
-      const name = this.state.newSpaceName || `Snapshot ${new Date().toDateString()}`;
-      chrome.storage.local.get("spaces", (spacesObj) => {
-        const spaces = utils.isEmpty(spacesObj) ? {} : spacesObj.spaces;
+      const name = this.state.newSnapshotName || `Snapshot ${new Date().toDateString()}`;
+      chrome.storage.local.get("snapshots", (snapshotsObj) => {
+        const snapshots = utils.isEmpty(snapshotsObj) ? {} : snapshotsObj.snapshots;
         const id = shortid.generate();
-        spaces[id] = { id, name, tabs };
-        chrome.storage.local.set({ spaces }, () => {
-          this.setState({ newSpaceName: "" });
+        snapshots[id] = { id, name, tabs };
+        chrome.storage.local.set({ snapshots }, () => {
+          this.setState({ newSnapshotName: "" });
           chrome.runtime.sendMessage({value: "reload"});
         });
       });
@@ -61,8 +51,8 @@ export default class Popup extends React.Component {
     return (
       <div className="popup">
         <h3>Snapshot Name:</h3>
-        <Input value={this.state.newSpaceName} onChange={this.changeName}/>
-        <Button disabled={this.state.newSpaceName.length > 0 ? false : true } className="popup-button" type="primary" size="large" onClick={this.takeSnapshot}><CameraOutlined/>Take Snapshot</Button>
+        <Input value={this.state.newSnapshotName} onChange={this.changeName}/>
+        <Button disabled={this.state.newSnapshotName.length > 0 ? false : true } className="popup-button" type="primary" size="large" onClick={this.takeSnapshot}><CameraOutlined/>Take Snapshot</Button>
         <Button className="popup-button" size="large" onClick={this.openDash}><DashboardOutlined/>View Dashboard</Button>
       </div>
     );
