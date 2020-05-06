@@ -1,2 +1,4 @@
 ## SnapTab Chrome Extension
-A Chrome extension that allows you to save a snapshot of the tabs in your current window to jump back into them at a later time.
+Say goodbye to hoarded tabs, and say hello to SnapTab! SnapTab's signature "snapshot" feature lets you save all of the tabs currently in your browser window with one click. You can access and edit your snapshots from SnapTab's intuitive dashboard for later use.
+
+Try SnapTab out for yourself [here](https://chrome.google.com/webstore/detail/iihldjnghemdinkkpmkoafbhlfbplplc)!
